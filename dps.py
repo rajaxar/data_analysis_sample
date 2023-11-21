@@ -15,32 +15,33 @@ st.write("""
          """)
 
 lunch_file = st.file_uploader("Upload a CSV with school lunch data (default provided.)", type="csv")
+st.write("Make sure your data has columns for participation rates in months 1-13.")
 
 @st.cache_data()
 def load_file(f):
     if f:
         df = pd.read_csv(f)
+        if 'Month 13' not in df.columns:
+            st.error("Please upload a CSV with a column for month 13 participation rates. Reverting to default data.")
+            df = pd.read_csv('lunch.csv')
     else:
         df = pd.read_csv('lunch.csv')
     return df
 
 lunch_df = load_file(lunch_file)
-lunch_df.rename(columns={'Rotation Type': 'Rotation', 
-                          'School EdLevel': 'Edu_level',
-                          'School Name': 'SName',
-                          'Month 01': 'Month1',
-                          'Month 02': 'Month2',
-                          'Month 03': 'Month3',
-                          'Month 04': 'Month4',
-                          'Month 05': 'Month5',
-                          'Month 06': 'Month6',
-                          'Month 07': 'Month7',
-                          'Month 08': 'Month8',
-                          'Month 09': 'Month9',
-                          'Month 10': 'Month10',
-                          'Month 11': 'Month11',
-                          'Month 12': 'Month12',
-                          'Month 13': 'Month13'
+lunch_df.rename(columns={'Month 01': 'Month1',
+                         'Month 02': 'Month2',
+                         'Month 03': 'Month3',
+                         'Month 04': 'Month4',
+                         'Month 05': 'Month5',
+                         'Month 06': 'Month6',
+                         'Month 07': 'Month7',
+                         'Month 08': 'Month8',
+                         'Month 09': 'Month9',
+                         'Month 10': 'Month10',
+                         'Month 11': 'Month11',
+                         'Month 12': 'Month12',
+                         'Month 13': 'Month13'
                          }, inplace=True)
 
 st.dataframe(lunch_df.head(7))
