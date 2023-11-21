@@ -63,27 +63,23 @@ new_df = new_df.astype('float64')
 tab1, tab2, tab3 = st.tabs(["Picking our Months", "Visualizing our Results", "Predicting Month 13"])
 
 with tab1:
-    add_vertical_space(2)
-
+    st.subheader("Let's pick our months!")
+    add_vertical_space(1)
     st.write("Here is a correlation matrix of the selected months:")
     col1, col2 = st.columns(2, gap="large")
     corr = new_df.corr()
     mask = np.triu(np.ones_like(corr, dtype=bool))
     corr = corr.mask(mask).iloc[1:, :-1]
-    
     with col1:
         st.dataframe(corr)
     with col2:
         fig, ax = plt.subplots()
         sns.heatmap(corr, annot=False, ax=ax)
         st.pyplot(fig)
-
     add_vertical_space(5)
-
     st.write("Let's build a linear regression model to predict month 13 participation rate based on the selected months.")
     month_vars = 'Month13 ~' + ' + '.join(options)
     model = ols(month_vars, data=new_df).fit()
-
     col1, col2 = st.columns(2, gap="large")
     with col1:
         st.write(model.summary().tables[1].as_html(), unsafe_allow_html=True)
@@ -97,7 +93,8 @@ with tab1:
         st.write("Try removing months with high p-values to see how it affects the model!")
 
 with tab2:
-    add_vertical_space(2)
+    st.subheader("Let's see how well our model predicts month 13!")
+    add_vertical_space(1)
     st.write('The computed model is: ')
     latex_equation = ''
     for i in range(len(model.params)):
@@ -105,11 +102,9 @@ with tab2:
             latex_equation += str(round(model.params.iloc[i], 2))
         else:
             latex_equation += ' + ' + str(round(model.params.iloc[i], 2)) + ' * ' + options[i-1].replace('Month', 'x_{') + '}'
-    
     latex_equation = 'x_{13} = ' + latex_equation + ' + \\epsilon'
     st.latex(latex_equation.replace('+ -', '- '))
     add_vertical_space(5)
-
     st.write("Here is a scatterplot of the predicted vs. actual values:")
     predictions = model.predict(new_df)
     fig = alt.Chart(pd.DataFrame({'Actual': new_df['Month13'], 'Predicted': predictions})).mark_circle().encode(
@@ -119,17 +114,17 @@ with tab2:
     regression = fig \
         .transform_regression('Actual', 'Predicted') \
         .mark_line()
-    
     st.altair_chart(fig + regression, use_container_width=True)
 
 with tab3:
-    add_vertical_space(2)
+    st.subheader("Let's predict the participation rate for a given month 13!")
+    add_vertical_space(1)
+    st.write("Use the sliders below to select the participation rate for each month, and we can use our generated model to predict the participation rate for month 13.")
     col1, col2 = st.columns(2, gap="large")
     with col1:
         selections = {}
         for option in options:
             selections[option] = st.slider(f"What participation was there in {option.replace('Month', 'Month ')}?", 0, 100, 50) / 100
-
     with col2:
         st.write("Here are the selections you made:")
         st.write(selections)
